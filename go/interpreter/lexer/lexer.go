@@ -46,8 +46,8 @@ func (l *Lexer) NextToken() token.Token {
 			tok.Type = token.LookupIdent(tok.Literal)
 			return tok
 		} else if isDigit(l.character) {
-			tok.Type = token.INT
 			tok.Literal = l.readNumber()
+			tok.Type = token.LookupNumberType(tok.Literal)
 			return tok
 		} else {
 			tok = newToken(token.ILLEGAL, l.character)
@@ -93,7 +93,7 @@ func (l *Lexer) skipWhitespace() {
 // Helper Functions
 
 func isDigit(character byte) bool {
-	return '0' <= character && character <= '9'
+	return '0' <= character && character <= '9' || character == '.'
 }
 
 func isLetter(character byte) bool {

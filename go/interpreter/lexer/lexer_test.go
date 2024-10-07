@@ -5,6 +5,11 @@ import (
 	"testing"
 )
 
+type TokenExpection struct {
+	expectedType    token.TokenType
+	expectedLiteral string
+}
+
 func TestNextToken(t *testing.T) {
 	input := `let five = 5;
                    let ten = 10;
@@ -14,10 +19,7 @@ func TestNextToken(t *testing.T) {
                    let result = add(five, ten);
                    `
 
-	tests := []struct {
-		expectedType    token.TokenType
-		expectedLiteral string
-	}{
+	tests := []TokenExpection{
 		{token.LET, "let"},
 		{token.IDENT, "five"},
 		{token.ASSIGN, "="},
@@ -56,6 +58,56 @@ func TestNextToken(t *testing.T) {
 		{token.SEMICOLON, ";"},
 		{token.EOF, ""},
 	}
+
+	checkTokenizedResult(input, tests, t)
+}
+
+func TestNumberDefinitions(t *testing.T) {
+	input := `let five = 5;
+                   let tenPointEight = 10.8;
+                   let pointTwo = .2;
+                   `
+
+	tests := []TokenExpection{
+		{token.LET, "let"},
+		{token.IDENT, "five"},
+		{token.ASSIGN, "="},
+		{token.INT, "5"},
+		{token.SEMICOLON, ";"},
+		{token.LET, "let"},
+		{token.IDENT, "tenPointEight"},
+		{token.ASSIGN, "="},
+		{token.FLOAT, "10.8"},
+		{token.SEMICOLON, ";"},
+		{token.LET, "let"},
+		{token.IDENT, "pointTwo"},
+		{token.ASSIGN, "="},
+		{token.FLOAT, ".2"},
+		{token.SEMICOLON, ";"},
+		{token.EOF, ""},
+	}
+
+	checkTokenizedResult(input, tests, t)
+}
+
+func TestIllegalNumber(t *testing.T) {
+	input := `let five = 5.4.4;
+                   `
+
+	tests := []TokenExpection{
+		{token.LET, "let"},
+		{token.IDENT, "five"},
+		{token.ASSIGN, "="},
+		{token.ILLEGAL, "5.4.4"},
+		{token.SEMICOLON, ";"},
+		{token.EOF, ""},
+	}
+
+	checkTokenizedResult(input, tests, t)
+}
+
+func checkTokenizedResult(input string, tests []TokenExpection, t *testing.T) {
+	t.Helper()
 
 	l := New(input)
 
