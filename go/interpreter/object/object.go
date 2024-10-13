@@ -21,6 +21,10 @@ type Boolean struct {
 	Value bool
 }
 
+type ReturnValue struct {
+	Value Object
+}
+
 type Null struct {
 	Value any
 }
@@ -29,6 +33,7 @@ const (
 	INTEGER_OBJ = "INTEGER"
 	FLOAT_OBJ   = "FLOAT"
 	BOOLEAN_OBJ = "BOOLEAN"
+	RETURN_OBJ  = "RETURN"
 	NULL_OBJ    = "NULL"
 )
 
@@ -40,6 +45,9 @@ func (f *Float) Type() ObjectType { return FLOAT_OBJ }
 
 func (b *Boolean) Inspect() string  { return fmt.Sprintf("%t", b.Value) }
 func (b *Boolean) Type() ObjectType { return BOOLEAN_OBJ }
+
+func (rv *ReturnValue) Inspect() string  { return rv.Value.Inspect() }
+func (rv *ReturnValue) Type() ObjectType { return RETURN_OBJ }
 
 func (n *Null) Inspect() string  { return "null" }
 func (n *Null) Type() ObjectType { return NULL_OBJ }
