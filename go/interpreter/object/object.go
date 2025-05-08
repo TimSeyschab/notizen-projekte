@@ -25,6 +25,10 @@ type ReturnValue struct {
 	Value Object
 }
 
+type Error struct {
+	Message string
+}
+
 type Null struct {
 	Value any
 }
@@ -34,6 +38,7 @@ const (
 	FLOAT_OBJ   = "FLOAT"
 	BOOLEAN_OBJ = "BOOLEAN"
 	RETURN_OBJ  = "RETURN"
+	ERROR_OBJ   = "ERROR"
 	NULL_OBJ    = "NULL"
 )
 
@@ -48,6 +53,9 @@ func (b *Boolean) Type() ObjectType { return BOOLEAN_OBJ }
 
 func (rv *ReturnValue) Inspect() string  { return rv.Value.Inspect() }
 func (rv *ReturnValue) Type() ObjectType { return RETURN_OBJ }
+
+func (e *Error) Inspect() string  { return "ERROR: " + e.Message }
+func (e *Error) Type() ObjectType { return ERROR_OBJ }
 
 func (n *Null) Inspect() string  { return "null" }
 func (n *Null) Type() ObjectType { return NULL_OBJ }
