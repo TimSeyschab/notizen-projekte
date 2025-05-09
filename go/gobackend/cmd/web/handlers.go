@@ -1,7 +1,9 @@
 package main
 
 import (
+	"errors"
 	"fmt"
+	"gobackend/internal/models"
 	"html/template"
 	"net/http"
 )
@@ -37,14 +39,24 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func view(w http.ResponseWriter, r *http.Request) {
+func (app *application) view(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	if len(id) == 0 {
 		http.NotFound(w, r)
 		return
 	}
 
-	fmt.Fprintf(w, "Display a specific id %s", id)
+	// return a 404 Not Found response.
+	snippet, err := app.snippets.Get(id)
+	if err != nil {
+		if errors.Is(err, models.ErrNoSnippet) {
+			http.NotFound(w, r)
+		} else {
+			app.serveError(w, r, err)
+		}
+		return
+	}
+	fmt.Fprintf(w, "%+v", snippet)
 }
 
 func create(w http.ResponseWriter, r *http.Request) {
@@ -57,5 +69,5 @@ func (app *application) createPost(w http.ResponseWriter, r *http.Request) {
 		app.serveError(w, r, err)
 		return
 	}
-	http.Redirect(w, r, fmt.Sprintf("/snippet/view/%s", id), http.StatusSeeOther)
+	http.Redirect(w, r, fmt.Sprintf("/view/%s", id), http.StatusSeeOther)
 }

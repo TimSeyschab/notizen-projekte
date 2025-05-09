@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
@@ -36,5 +37,19 @@ func (m *SnippetModel) Insert(title string, content string, expires int) (string
 }
 
 func (m *SnippetModel) Get(hex string) (Snippet, error) {
-	return Snippet{}, nil
+	oid, err := bson.ObjectIDFromHex(hex)
+	if err != nil {
+		return Snippet{}, err
+	}
+
+	var result Snippet
+	err = m.Collection.FindOne(context.TODO(), bson.M{"_id": oid}).Decode(&result)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return Snippet{}, ErrNoSnippet
+		}
+		return Snippet{}, err
+	}
+
+	return result, nil
 }
