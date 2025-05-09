@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
-	"strconv"
 )
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
@@ -39,20 +38,24 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 }
 
 func view(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(r.PathValue("id"))
-	if err != nil || id < 1 {
+	id := r.PathValue("id")
+	if len(id) == 0 {
 		http.NotFound(w, r)
 		return
 	}
 
-	fmt.Fprintf(w, "Display a specific id %d", id)
+	fmt.Fprintf(w, "Display a specific id %s", id)
 }
 
 func create(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("ShowCreate"))
 }
 
-func createPost(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusCreated)
-	w.Write([]byte("Create Post"))
+func (app *application) createPost(w http.ResponseWriter, r *http.Request) {
+	id, err := app.snippets.Insert("snail", "oompaloompa", 7)
+	if err != nil {
+		app.serveError(w, r, err)
+		return
+	}
+	http.Redirect(w, r, fmt.Sprintf("/snippet/view/%s", id), http.StatusSeeOther)
 }

@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"gobackend/internal/models"
 	"log/slog"
 	"net/http"
 	"os"
@@ -12,7 +13,8 @@ import (
 )
 
 type application struct {
-	logger *slog.Logger
+	logger   *slog.Logger
+	snippets *models.SnippetModel
 }
 
 func main() {
@@ -22,16 +24,15 @@ func main() {
 
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 
+	client, err := openDB(*mongodb_uri)
+	defer client.Disconnect(context.TODO())
+
 	app := &application{
-		logger: logger,
+		logger:   logger,
+		snippets: &models.SnippetModel{Collection: client.Database("snippetbox").Collection("snippets")},
 	}
 
 	logger.Info("starting server", "addr", *addr)
-
-	client, err := openDB(*mongodb_uri)
-
-	defer client.Disconnect(context.TODO())
-
 	err = http.ListenAndServe(*addr, app.routes())
 
 	logger.Error(err.Error())
