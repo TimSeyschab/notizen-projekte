@@ -7,6 +7,7 @@ import (
 
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 type Snippet struct {
@@ -52,4 +53,20 @@ func (m *SnippetModel) Get(hex string) (Snippet, error) {
 	}
 
 	return result, nil
+}
+
+func (m *SnippetModel) Latest() ([]Snippet, error) {
+	opts := options.Find().SetLimit(2)
+
+	cursor, error := m.Collection.Find(context.TODO(), bson.M{}, opts)
+	if error != nil {
+		return nil, error
+	}
+
+	var results []Snippet
+	if err := cursor.All(context.TODO(), &results); err != nil {
+		return nil, error
+	}
+
+	return results, nil
 }

@@ -11,6 +11,15 @@ import (
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("X-Test-Id", "TimTest")
 
+	snippets, err := app.snippets.Latest()
+	if err != nil {
+		app.serveError(w, r, err)
+		return
+	}
+	for _, snippet := range snippets {
+		app.logger.Info(fmt.Sprintf("%+v\n", snippet))
+	}
+
 	// Initialize a slice containing the paths to the two files. It's important
 	// to note that the file containing our base template must be the *first*
 	// file in the slice.
